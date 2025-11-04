@@ -1,0 +1,32 @@
+﻿<Application x:Class="auth_elgamal.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:auth_elgamal"
+             xmlns:vm="clr-namespace:auth_elgamal.ViewModels"
+             xmlns:v="clr-namespace:auth_elgamal.Views"
+             xmlns:converters="clr-namespace:auth_elgamal.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="Blue" SecondaryColor="Lime" />
+                
+            </ResourceDictionary.MergedDictionaries>
+
+            <converters:NullToFalseConverter x:Key="NullToFalseConverter"/>
+
+            <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+                <v:LoginView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AdminViewModel}">
+                <v:AdminView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:UserViewModel}">
+                <v:UserView/>
+            </DataTemplate>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
