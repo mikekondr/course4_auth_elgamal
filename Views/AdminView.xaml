@@ -8,102 +8,121 @@
     d:DesignWidth="900">
 
     <Grid Margin="10">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" MinWidth="300"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="1.5*" MinWidth="300"/>
-        </Grid.ColumnDefinitions>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
-                   Text="Адмінітратор: Керування користувачами" FontSize="18" Margin="0,0,0,10"
-                   VerticalAlignment="Center"/>
+        <Border Grid.Row="0" 
+            Padding="10" 
+            BorderThickness="0,0,0,1" 
+            BorderBrush="{DynamicResource MaterialDesignDivider}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <Button Grid.Row="0" Grid.Column="3"
-            Content="Вийти" 
-            Command="{Binding LogoutCommand}" 
-            VerticalAlignment="Center" HorizontalAlignment="Right" 
-            Margin="10" Padding="5"/>
+                <TextBlock Grid.Column="0"
+                           Text="Адміністратор: Керування користувачами"
+                           FontSize="18" FontWeight="Bold"
+                           VerticalAlignment="Center"/>
 
-        <DataGrid Grid.Row="1" Grid.Column="0" 
+                <Button Grid.Column="1" 
+                        Content="Вийти" 
+                        Command="{Binding LogoutCommand}"
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Right"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" MinWidth="300"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1.5*" MinWidth="300"/>
+            </Grid.ColumnDefinitions>
+
+
+
+            <DataGrid Grid.Column="0" 
                       ItemsSource="{Binding Users}"
                       SelectedItem="{Binding SelectedUser}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       SelectionMode="Single"
                       Margin="0 0 5 0">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Логін" Binding="{Binding Login}" Width="*"/>
-                <DataGridTextColumn Header="Пароль" Binding="{Binding Password}" Width="*"/>
-                <DataGridTextColumn Header="Доступи" Binding="{Binding PermissionSummary}" Width="2*"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Логін" Binding="{Binding Login}" Width="*"/>
+                    <DataGridTextColumn Header="Пароль" Binding="{Binding Password}" Width="*"/>
+                    <DataGridTextColumn Header="Доступи" Binding="{Binding PermissionSummary}" Width="2*"/>
+                </DataGrid.Columns>
+            </DataGrid>
 
-        <GridSplitter Grid.Column="1" Grid.Row="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="LightGray"/>
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="LightGray"/>
 
-        <Border Grid.Column="2" Grid.Row="1"
+            <Border Grid.Column="2"
                 Margin="5,0,0,0" 
                 IsEnabled="{Binding EditingUser, Converter={StaticResource NullToFalseConverter}}"
                 BorderBrush="Gray" BorderThickness="1" Padding="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="{Binding EditingPanelHeader}" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                        <TextBlock Grid.Row="0" Text="{Binding EditingPanelHeader}" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
 
-                <StackPanel Grid.Row="1">
-                    <TextBlock Text="Логін:"/>
-                    <TextBox Text="{Binding EditingUser.Login, UpdateSourceTrigger=PropertyChanged}" 
-                                 IsEnabled="{Binding EditingUser.LoginIsEditable}"
-                                 Margin="0,2,0,10"/>
+                        <StackPanel Grid.Row="1">
+                            <TextBlock Text="Логін:"/>
+                            <TextBox Text="{Binding EditingUser.Login, UpdateSourceTrigger=PropertyChanged}" 
+                                     IsEnabled="{Binding EditingUser.LoginIsEditable}"
+                                     Margin="0,2,0,10"/>
 
-                    <TextBlock Text="Пароль:"/>
-                    <TextBox Text="{Binding EditingUser.Password, UpdateSourceTrigger=PropertyChanged}" 
-                                 Margin="0,2,0,10"/>
-                </StackPanel>
+                            <TextBlock Text="Пароль:"/>
+                            <TextBox Text="{Binding EditingUser.Password, UpdateSourceTrigger=PropertyChanged}" 
+                                     Margin="0,2,0,10"/>
+                        </StackPanel>
 
-                <TextBlock Grid.Row="2" Text="Права доступу:" Margin="0,10,0,5"/>
+                        <TextBlock Grid.Row="2" Text="Права доступу:" Margin="0,10,0,5"/>
 
-                <UniformGrid Grid.Row="3" Columns="4" Rows="4" MaxWidth="250" HorizontalAlignment="Left">
-                    <TextBlock/>
-                    <TextBlock Text="R" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="W" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="E" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <UniformGrid Grid.Row="3" Columns="4" Rows="4" MaxWidth="250" HorizontalAlignment="Left">
+                            <TextBlock/>
+                            <TextBlock Text="R" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="W" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="E" FontWeight="Bold" HorizontalAlignment="Center"/>
 
-                    <TextBlock Text="Диск A:" VerticalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskA_R}" HorizontalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskA_W}" HorizontalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskA_E}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Диск A:" VerticalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskA_R}" HorizontalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskA_W}" HorizontalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskA_E}" HorizontalAlignment="Center"/>
 
-                    <TextBlock Text="Диск B:" VerticalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskB_R}" HorizontalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskB_W}" HorizontalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskB_E}" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Диск B:" VerticalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskB_R}" HorizontalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskB_W}" HorizontalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskB_E}" HorizontalAlignment="Center"/>
 
-                    <TextBlock Text="Диск C:" VerticalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskC_R}" HorizontalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskC_W}" HorizontalAlignment="Center"/>
-                    <CheckBox IsChecked="{Binding EditingUser.DiskC_E}" HorizontalAlignment="Center"/>
-                </UniformGrid>
+                            <TextBlock Text="Диск C:" VerticalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskC_R}" HorizontalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskC_W}" HorizontalAlignment="Center"/>
+                            <CheckBox IsChecked="{Binding EditingUser.DiskC_E}" HorizontalAlignment="Center"/>
+                        </UniformGrid>
 
-                <Button Grid.Row="4" Content="Зберегти зміни" Command="{Binding SaveCommand}" Padding="10,5"
-                    HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                    Margin="0,15,0,0"/>
-            </Grid>
-        </Border>
+                        <Button Grid.Row="4" Content="Зберегти зміни" Command="{Binding SaveCommand}" Padding="10,5"
+                        HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                        Margin="0,15,0,0"/>
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+        </Grid>
 
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
+        <StackPanel Grid.Row="3">
             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
                 <Button Content="Додати нового" Command="{Binding AddNewCommand}" Padding="10,5"/>
                 <Button Content="Видалити обраного" Command="{Binding DeleteCommand}" Margin="10,0,0,0" Padding="10,5"/>

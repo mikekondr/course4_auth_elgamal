@@ -10,10 +10,10 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
 
-                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="Blue" SecondaryColor="Lime" />
-                
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <converters:NullToFalseConverter x:Key="NullToFalseConverter"/>
@@ -27,6 +27,12 @@
             <DataTemplate DataType="{x:Type vm:UserViewModel}">
                 <v:UserView/>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DriveViewModel}">
+                <v:DriveView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:EncryptionViewModel}">
+                <v:EncryptionView/>
+            </DataTemplate>
 
             <DataTemplate DataType="{x:Type notifications:SuccessNotification}">
                 <Border Background="#CC2E7D32"
@@ -35,7 +41,7 @@
                         <materialDesign:PackIcon Kind="CheckCircleOutline" 
                                              Foreground="White" 
                                              VerticalAlignment="Center" 
-                                             Margin="0,0,12,0"
+                                             Margin="0,0,10,0"
                                              Width="20" Height="20"/>
                         <TextBlock Text="{Binding Message}" 
                                Foreground="White" 
@@ -48,8 +54,8 @@
 
             <DataTemplate DataType="{x:Type notifications:ErrorNotification}">
                 <Border Background="#CCC62828"
-                    CornerRadius="4" MinWidth="288" MaxWidth="568">
-                    <Grid Margin="16,12">
+						CornerRadius="4" MinWidth="288" MaxWidth="568">
+                    <Grid Margin="16,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -57,26 +63,25 @@
                         </Grid.ColumnDefinitions>
 
                         <materialDesign:PackIcon Kind="AlertCircleOutline" 
-                                             Foreground="White" 
-                                             VerticalAlignment="Center"
-                                             Width="20" Height="20"
-                                             Grid.Column="0"/>
+									 Foreground="White" 
+									 VerticalAlignment="Center"
+									 Width="20" Height="20"
+									 Grid.Column="0"/>
 
                         <TextBlock Text="{Binding Message}" 
-                               Foreground="White" 
-                               FontWeight="Bold"
-                               VerticalAlignment="Center"
-                               TextWrapping="Wrap"
-                               Margin="12,0"
-                               Grid.Column="1"/>
+					               Foreground="White" 
+					               FontWeight="Bold"
+					               VerticalAlignment="Center"
+					               TextWrapping="Wrap"
+					               Margin="12,0"
+					               Grid.Column="1"/>
 
                         <Button Content="OK"
-                            Style="{StaticResource MaterialDesignFlatButton}"
-                            Foreground="White"
-                            Grid.Column="2"
-                            VerticalAlignment="Center"
-        
-                            Command="{Binding RelativeSource={RelativeSource AncestorType=materialDesign:SnackbarMessage}, Path=CloseCommand}"/>
+					            Style="{DynamicResource MaterialDesignFlatButton}"
+					            Foreground="White"
+					            Grid.Column="2"
+					            VerticalAlignment="Center"
+					            Command="{Binding RelativeSource={RelativeSource AncestorType=materialDesign:SnackbarMessage}, Path=CloseCommand}"/>
                     </Grid>
                 </Border>
             </DataTemplate>
