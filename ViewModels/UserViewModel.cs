@@ -1,6 +1,8 @@
 ﻿using auth_elgamal.Models;
 using MaterialDesignThemes.Wpf;
 using System.Windows.Input;
+using auth_elgamal.Models;
+using auth_elgamal.ViewModels.SubViewModels;
 
 namespace auth_elgamal.ViewModels
 {
@@ -43,14 +45,23 @@ namespace auth_elgamal.ViewModels
             LogoutCommand = new RelayCommand(_ => _mainVM.GoToLoginCommand.Execute(null));
 
             // Ініціалізуємо наші під-VM
-            _driveVM = new DriveViewModel();
+            _driveVM = new DriveViewModel(_notificationQueue);
             _encryptionVM = new EncryptionViewModel();
 
             // Ініціалізуємо команди
-            GoToDrivesCommand = new RelayCommand(_ => CurrentSubViewModel = _driveVM);
+            GoToDrivesCommand = new RelayCommand(ActivateDrives);
             GoToEncryptionCommand = new RelayCommand(_ => CurrentSubViewModel = _encryptionVM);
 
             // Встановлюємо режим за замовчуванням (наприклад, диски)
+            CurrentSubViewModel = _driveVM;
+        }
+
+        private void ActivateDrives(object obj)
+        {
+            // 1. Активуємо VM, передаючи їй поточного користувача
+            _driveVM.Activate(_mainVM.CurrentUser);
+
+            // 2. Встановлюємо її як поточний інтерфейс
             CurrentSubViewModel = _driveVM;
         }
 
@@ -61,6 +72,8 @@ namespace auth_elgamal.ViewModels
             {
                 WelcomeMessage = $"Вітаємо, {CurrentUser.Login}!";
             }
+
+            ActivateDrives(null);
         }
     }
 }

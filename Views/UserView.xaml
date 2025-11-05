@@ -43,41 +43,45 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="{DynamicResource MaterialDesignPaper}" 
-                Effect="{DynamicResource MaterialDesignShadowDepth.Depth1}">
+            <Border Grid.Column="0" 
+                    Background="{DynamicResource MaterialDesignPaper}" 
+                    Effect="{DynamicResource MaterialDesignShadowDepth.Depth1}">
 
-                <StackPanel Width="200">
+                <StackPanel Width="225">
                     <ListBox Style="{DynamicResource MaterialDesignNavigationListBox}">
 
-                        <ListBoxItem>
-                            <Button HorizontalContentAlignment="Left"
-                                Style="{DynamicResource MaterialDesignFlatButton}"
-                                Command="{Binding GoToDrivesCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Harddisk" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Доступ до дисків"/>
-                                </StackPanel>
-                            </Button>
+                        <ListBoxItem HorizontalContentAlignment="Stretch">
+                            <ListBoxItem.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" 
+                                              Command="{Binding GoToDrivesCommand}"/>
+                            </ListBoxItem.InputBindings>
+
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Harddisk" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Доступ до дисків"/>
+                            </StackPanel>
                         </ListBoxItem>
 
-                        <ListBoxItem>
-                            <Button HorizontalContentAlignment="Left"
-                                Style="{DynamicResource MaterialDesignFlatButton}"
-                                Command="{Binding GoToEncryptionCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Lock" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Шифрування"/>
-                                </StackPanel>
-                            </Button>
+                        <ListBoxItem HorizontalContentAlignment="Stretch">
+                            <ListBoxItem.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" 
+                                              Command="{Binding GoToEncryptionCommand}"/>
+                            </ListBoxItem.InputBindings>
+
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Lock" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Шифрування"/>
+                            </StackPanel>
                         </ListBoxItem>
+
                     </ListBox>
-
                 </StackPanel>
             </Border>
 
             <ContentControl Grid.Column="1" 
-                        Content="{Binding CurrentSubViewModel}"
-                        Margin="10"/>
+                            Content="{Binding CurrentSubViewModel}"
+                            Margin="10"/>
         </Grid>
+
     </Grid>
 </UserControl>
