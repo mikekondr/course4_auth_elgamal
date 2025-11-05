@@ -44,5 +44,12 @@ namespace auth_elgamal.ViewModels
                 Disks.Add(new DiskViewModel(diskLetter, rights, _notificationQueue, _currentUserLogin));
             }
         }
+
+        // /ViewModels/DriveViewModel.cs
+        public void ClearData()
+        {
+            Disks.Clear();
+            _currentUserLogin = null;
+        }
     }
 }

@@ -70,8 +70,15 @@ namespace auth_elgamal.ViewModels
             GoToLoginCommand = new RelayCommand(_ =>
             {
                 LoggingService.Instance.LogEvent(CurrentUser.Login, "Вихід із системи");
-                CurrentUser = null; // <-- ОЧИЩЕННЯ
-                CurrentViewModel = _loginVM;
+
+                CurrentUser = null; // Очищуємо поточного користувача
+
+                // Викликаємо очищення для всіх під-систем UserView
+                _userVM.ClearSessionData();
+
+                // (Опціонально: можна додати _adminVM.ClearSessionData(), якщо потрібно)
+
+                CurrentViewModel = _loginVM; // Переходимо на логін
             });
 
             // Початковий режим

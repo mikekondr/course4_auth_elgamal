@@ -3,10 +3,112 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:auth_elgamal.Views"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBlock Text="Encryption View" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24"/>
-    </Grid>
+             d:DesignHeight="550" d:DesignWidth="700">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="Шифрування повідомлень (Ель-Гамаль)" FontSize="18" FontWeight="Medium" Margin="0,0,0,10"/>
+
+            <TextBox Grid.Row="1"
+                     Text="{Binding PlainText, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Введіть текст для шифрування..."
+                     MinHeight="100" Margin="0,5,0,5"
+                     TextWrapping="Wrap" AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <TextBox Grid.Row="2"
+                     Text="{Binding ResultText, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Результат шифрування / Текст для розшифрування..."
+                     MinHeight="100" Margin="0,5,0,5"
+                     TextWrapping="Wrap" AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+
+            <Grid Grid.Row="3" Margin="0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+
+                    <Button Content="Зашифрувати"
+                Command="{Binding EncryptCommand}"
+                Style="{DynamicResource MaterialDesignRaisedButton}"/>
+
+                    <Button Content="Розшифрувати"
+                Command="{Binding DecryptCommand}"
+                Style="{DynamicResource MaterialDesignRaisedSecondaryButton}"
+                Margin="10,0,0,0"/>
+
+                    <Button Content="Очистити"
+                Command="{Binding ClearCommand}"
+                
+                Style="{DynamicResource MaterialDesignFlatButton}"
+                Margin="10,0,0,0"/>
+                </StackPanel>
+
+
+                <Button Grid.Column="1"
+                    Style="{DynamicResource MaterialDesignFlatButton}"
+                    Command="{Binding LoadEncryptedFileCommand}"
+                    ToolTip="Завантажити вміст з close.txt"
+                    HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FileDownload" />
+                        <TextBlock Text="Завантажити з close.txt" Margin="5,0,0,0"/>
+                    </StackPanel>
+                </Button>
+
+            </Grid>
+
+            <StackPanel Grid.Row="4" Margin="0,20,0,0">
+                <TextBlock Text="Керування ключами" FontSize="16" FontWeight="Medium"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <materialDesign:PackIcon Kind="Key" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock Text="Приватний ключ:" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <TextBlock Text="{Binding PrivateKeyStatus}" VerticalAlignment="Center" Margin="10,0,0,0"
+                               FontWeight="Medium"
+                               Foreground="{Binding PrivateKeyStatusColor}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <materialDesign:PackIcon Kind="KeyArrowRight" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBlock Text="Адресат:" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <TextBox Text="{Binding RecipientName, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Ім'я (напр. user1)"
+                             MinWidth="150" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                    <Button Content="Завантажити .pub"
+                            Command="{Binding LoadRecipientKeyCommand}"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            Margin="5,0,0,0"/>
+                </StackPanel>
+
+                <TextBlock Text="{Binding PublicKeyStatus}" VerticalAlignment="Center" Margin="30,5,0,0"
+                           FontWeight="Medium" Foreground="{Binding PublicKeyStatusColor}"/>
+
+                <Button Content="Згенерувати мою пару ключів"
+                        Command="{Binding GenerateKeysCommand}"
+                        Style="{DynamicResource MaterialDesignPaperButton}"
+                        Margin="0,20,0,0"
+                        HorizontalAlignment="Left"/>
+            </StackPanel>
+
+        </Grid>
+    </ScrollViewer>
 </UserControl>

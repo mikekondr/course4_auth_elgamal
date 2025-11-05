@@ -45,11 +45,11 @@ namespace auth_elgamal.ViewModels
 
             // Ініціалізуємо наші під-VM
             _driveVM = new DriveViewModel(_notificationQueue);
-            _encryptionVM = new EncryptionViewModel();
+            _encryptionVM = new EncryptionViewModel(_notificationQueue);
 
             // Ініціалізуємо команди
             GoToDrivesCommand = new RelayCommand(ActivateDrives);
-            GoToEncryptionCommand = new RelayCommand(_ => CurrentSubViewModel = _encryptionVM);
+            GoToEncryptionCommand = new RelayCommand(ActivateEncryption);
 
             // Встановлюємо режим за замовчуванням (наприклад, диски)
             CurrentSubViewModel = _driveVM;
@@ -66,6 +66,15 @@ namespace auth_elgamal.ViewModels
             CurrentSubViewModel = _driveVM;
         }
 
+        private void ActivateEncryption(object obj)
+        {
+            LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, "Перехід до розділу шифрування");
+
+            // "Активуємо" VM, передаючи їй поточного користувача
+            _encryptionVM.Activate(_mainVM.CurrentUser);
+            CurrentSubViewModel = _encryptionVM;
+        }
+
         // Цей метод викликається з MainWindowViewModel перед показом
         public void Activate()
         {
@@ -75,6 +84,24 @@ namespace auth_elgamal.ViewModels
             }
 
             ActivateDrives(null);
+        }
+
+        /// <summary>
+        /// Очищує всі дані, пов'язані з сеансом користувача.
+        /// </summary>
+        public void ClearSessionData()
+        {
+            // Очищуємо диски
+            _driveVM.ClearData();
+
+            // Очищуємо шифрування
+            _encryptionVM.ClearAllData();
+
+            // Скидаємо привітання
+            WelcomeMessage = string.Empty;
+
+            // Повертаємо на екран дисків за замовчуванням (для наступного користувача)
+            CurrentSubViewModel = _driveVM;
         }
     }
 }

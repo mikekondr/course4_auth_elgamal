@@ -8,7 +8,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="MainWindow" Height="550" Width="850"
+        Title="MainWindow" Height="650" Width="850"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Regular"
@@ -18,32 +18,33 @@
         <vm:MainWindowViewModel/>
     </Window.DataContext>
 
-    <Grid>
+    <materialDesign:DialogHost Identifier="RootDialogHost">
+        <Grid>
+            <ContentControl Content="{Binding CurrentViewModel}" />
 
-        <ContentControl Content="{Binding CurrentViewModel}" />
-
-        <materialDesign:Snackbar
-            MessageQueue="{Binding NotificationQueue}"
-            VerticalAlignment="Bottom"
-            HorizontalAlignment="Right"
-            Margin="15"
+            <materialDesign:Snackbar
+                MessageQueue="{Binding NotificationQueue}"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Right"
+                Margin="15"
     
-            Background="Transparent"
-            Padding="0"
-            BorderThickness="0">
+                Background="Transparent"
+                Padding="0"
+                BorderThickness="0">
 
-            <materialDesign:Snackbar.Resources>
-                <DataTemplate DataType="{x:Type sys:String}">
-                    <Border Background="{DynamicResource MaterialDesignSnackbarBackground}"
-                            CornerRadius="4" MinWidth="288" MaxWidth="568">
-                        <TextBlock Text="{Binding}"
-                                   Margin="16,14"
-                                   Foreground="{DynamicResource MaterialDesignSnackbarForeground}"
-                                   TextWrapping="Wrap"/>
-                    </Border>
-                </DataTemplate>
-            </materialDesign:Snackbar.Resources>
+                <materialDesign:Snackbar.Resources>
+                    <DataTemplate DataType="{x:Type sys:String}">
+                        <Border Background="{DynamicResource MaterialDesignSnackbarBackground}"
+                                CornerRadius="4" MinWidth="288" MaxWidth="568">
+                            <TextBlock Text="{Binding}"
+                                       Margin="16,10"
+                                       Foreground="{DynamicResource MaterialDesignSnackbarForeground}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+                    </DataTemplate>
+                </materialDesign:Snackbar.Resources>
 
-        </materialDesign:Snackbar>
-    </Grid>
+            </materialDesign:Snackbar>
+        </Grid>
+    </materialDesign:DialogHost>
 </Window>
