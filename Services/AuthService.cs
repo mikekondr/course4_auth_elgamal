@@ -1,14 +1,21 @@
-﻿using System;
-using System.IO;
-using auth_elgamal.Models; // Додаємо простір імен моделі
+﻿using auth_elgamal.Models;
 
 namespace auth_elgamal.Services
 {
     public class AuthService
     {
-        // Файл буде скопійовано у папку /bin/Debug/
-        private readonly string _filePath = "nameuser.txt";
+        // AuthService тепер залежить від UserService, щоб отримати дані
+        private readonly UserService _userService;
 
+        public AuthService()
+        {
+            _userService = new UserService(); // Створюємо екземпляр сервісу
+        }
+
+        /// <summary>
+        /// Перевіряє логін та пароль і повертає об'єкт User в разі успіху.
+        /// </summary>
+        /// <returns>Об'єкт User (admin або звичайний) або null, якщо валідація не пройдена.</returns>
         public User ValidateUser(string login, string password)
         {
             try
@@ -19,36 +26,27 @@ namespace auth_elgamal.Services
                     return new User("admin", true); // Повертаємо admin-користувача
                 }
 
-                // 2. Пошук у файлі
-                if (!File.Exists(_filePath))
-                {
-                    // Якщо файлу немає, звичайні користувачі увійти не зможуть
-                    return null;
-                }
+                // 2. Пошук у файлі (через UserService)
+                // Отримуємо список всіх користувачів (у вигляді UserEntryViewModel)
+                var allUsers = _userService.LoadUsers();
 
-                var lines = File.ReadAllLines(_filePath);
-                foreach (var line in lines)
-                {
-                    var parts = line.Split(':');
-                    // Переконуємось, що у рядку 3 частини: login:password:permissions
-                    if (parts.Length == 3)
-                    {
-                        string fileLogin = parts[0];
-                        string filePass = parts[1];
-                        string filePerms = parts[2];
+                // Шукаємо співпадіння логіна та пароля
+                var foundUserEntry = allUsers.FirstOrDefault(u =>
+                    u.Login.Equals(login, StringComparison.Ordinal) &&
+                    u.Password == password);
 
-                        if (fileLogin == login && filePass == password)
-                        {
-                            // Знайшли! Повертаємо звичайного користувача
-                            return new User(fileLogin, filePerms);
-                        }
-                    }
+                if (foundUserEntry != null)
+                {
+                    // Знайшли!
+                    // Конвертуємо UserEntryViewModel назад у модель User,
+                    // яку очікує наша MainWindowViewModel.
+                    return new User(foundUserEntry.Login, foundUserEntry.GetPermissionString());
                 }
             }
             catch (Exception ex)
             {
-                // Тут можна було б логувати помилку
-                // (наприклад, System.Diagnostics.Debug.WriteLine(ex.Message))
+                // Тут можна логувати помилку (наприклад, якщо UserService не зміг прочитати файл)
+                System.Diagnostics.Debug.WriteLine($"Auth Error: {ex.Message}");
             }
 
             // 3. Якщо нічого не знайдено

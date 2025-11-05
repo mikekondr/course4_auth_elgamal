@@ -1,7 +1,6 @@
-﻿using System;
-using System.Windows.Input;
-using auth_elgamal.Models;
+﻿using auth_elgamal.Models;
 using MaterialDesignThemes.Wpf;
+using System.Windows.Input;
 
 namespace auth_elgamal.ViewModels
 {

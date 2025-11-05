@@ -1,8 +1,7 @@
-﻿using auth_elgamal.Services;
-using auth_elgamal.ViewModels;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using auth_elgamal.Models.Notifications;
+using auth_elgamal.Services;
 using MaterialDesignThemes.Wpf;
+using System.Collections.ObjectModel;
 
 namespace auth_elgamal.ViewModels
 {
@@ -143,11 +142,11 @@ namespace auth_elgamal.ViewModels
             // Зберігаємо зміни у файл
             if (_userService.SaveUsers(Users))
             {
-                _notificationQueue.Enqueue($"Користувача {strLogin} видалено.");
+                _notificationQueue.Enqueue(new SuccessNotification { Message = $"Користувача {strLogin} видалено." });
             }
             else
             {
-                _notificationQueue.Enqueue("Помилка: не вдалося зберегти зміни.");
+                _notificationQueue.Enqueue(new ErrorNotification { Message = "Помилка: не вдалося зберегти зміни." });
                 LoadUsersList(); // Відновлюємо список з файлу
             }
 
@@ -167,7 +166,7 @@ namespace auth_elgamal.ViewModels
             if (string.IsNullOrWhiteSpace(EditingUser.Login) ||
                 string.IsNullOrWhiteSpace(EditingUser.Password))
             {
-                _notificationQueue.Enqueue("Помилка: Логін та Пароль не можуть бути порожніми.", "OK", () => { });
+                _notificationQueue.Enqueue(new ErrorNotification { Message = "Помилка: Логін та Пароль не можуть бути порожніми." });
                 return;
             }
 
@@ -192,14 +191,14 @@ namespace auth_elgamal.ViewModels
                 if (Users.Any(u => u.Login.Equals(EditingUser.Login,
                                  System.StringComparison.OrdinalIgnoreCase)))
                 {
-                    _notificationQueue.Enqueue("Помилка: Користувач з таким логіном вже існує.");
+                    _notificationQueue.Enqueue(new ErrorNotification { Message = "Помилка: Користувач з таким логіном вже існує." });
                     return;
                 }
 
                 // Перевірка ліміту
                 if (!CanAddNew(null))
                 {
-                    _notificationQueue.Enqueue("Помилка: Досягнуто ліміту користувачів (14).");
+                    _notificationQueue.Enqueue(new ErrorNotification { Message = "Помилка: Досягнуто ліміту користувачів (14)." });
                     return;
                 }
 
@@ -212,11 +211,11 @@ namespace auth_elgamal.ViewModels
             if (_userService.SaveUsers(Users))
             {
                 // Встановлюємо повідомлення про успіх
-                _notificationQueue.Enqueue($"Дані {savedLogin} збережено.");
+                _notificationQueue.Enqueue(new SuccessNotification { Message = $"Дані {savedLogin} збережено." });
             }
             else
             {
-                _notificationQueue.Enqueue("Помилка: не вдалося зберегти зміни у файл.");
+                _notificationQueue.Enqueue(new ErrorNotification { Message = "Помилка: не вдалося зберегти зміни у файл." });
                 LoadUsersList();
                 return;
             }

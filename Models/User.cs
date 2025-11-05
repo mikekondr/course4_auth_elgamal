@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace auth_elgamal.Models
+﻿namespace auth_elgamal.Models
 {
     public class User
     {

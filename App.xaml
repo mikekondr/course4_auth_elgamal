@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:auth_elgamal.ViewModels"
              xmlns:v="clr-namespace:auth_elgamal.Views"
              xmlns:converters="clr-namespace:auth_elgamal.Converters"
+             xmlns:notifications="clr-namespace:auth_elgamal.Models.Notifications"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
@@ -25,6 +26,59 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:UserViewModel}">
                 <v:UserView/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type notifications:SuccessNotification}">
+                <Border Background="#CC2E7D32"
+                    CornerRadius="4" MinWidth="288" MaxWidth="568">
+                    <StackPanel Orientation="Horizontal" Margin="16,12">
+                        <materialDesign:PackIcon Kind="CheckCircleOutline" 
+                                             Foreground="White" 
+                                             VerticalAlignment="Center" 
+                                             Margin="0,0,12,0"
+                                             Width="20" Height="20"/>
+                        <TextBlock Text="{Binding Message}" 
+                               Foreground="White" 
+                               FontWeight="Medium"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type notifications:ErrorNotification}">
+                <Border Background="#CCC62828"
+                    CornerRadius="4" MinWidth="288" MaxWidth="568">
+                    <Grid Margin="16,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <materialDesign:PackIcon Kind="AlertCircleOutline" 
+                                             Foreground="White" 
+                                             VerticalAlignment="Center"
+                                             Width="20" Height="20"
+                                             Grid.Column="0"/>
+
+                        <TextBlock Text="{Binding Message}" 
+                               Foreground="White" 
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"
+                               Margin="12,0"
+                               Grid.Column="1"/>
+
+                        <Button Content="OK"
+                            Style="{StaticResource MaterialDesignFlatButton}"
+                            Foreground="White"
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+        
+                            Command="{Binding RelativeSource={RelativeSource AncestorType=materialDesign:SnackbarMessage}, Path=CloseCommand}"/>
+                    </Grid>
+                </Border>
             </DataTemplate>
 
         </ResourceDictionary>

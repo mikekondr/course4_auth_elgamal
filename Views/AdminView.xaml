@@ -14,38 +14,40 @@
             <ColumnDefinition Width="1.5*" MinWidth="300"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" Margin="5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" Text="Керування користувачами" FontSize="18" Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                   Text="Адмінітратор: Керування користувачами" FontSize="18" Margin="0,0,0,10"
+                   VerticalAlignment="Center"/>
 
-            <DataGrid Grid.Row="1" 
+        <Button Grid.Row="0" Grid.Column="3"
+            Content="Вийти" 
+            Command="{Binding LogoutCommand}" 
+            VerticalAlignment="Center" HorizontalAlignment="Right" 
+            Margin="10" Padding="5"/>
+
+        <DataGrid Grid.Row="1" Grid.Column="0" 
                       ItemsSource="{Binding Users}"
                       SelectedItem="{Binding SelectedUser}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
-                      SelectionMode="Single">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Логін" Binding="{Binding Login}" Width="*"/>
-                    <DataGridTextColumn Header="Пароль" Binding="{Binding Password}" Width="*"/>
-                    <DataGridTextColumn Header="Доступи" Binding="{Binding PermissionSummary}" Width="2*"/>
-                </DataGrid.Columns>
-            </DataGrid>
+                      SelectionMode="Single"
+                      Margin="0 0 5 0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Логін" Binding="{Binding Login}" Width="*"/>
+                <DataGridTextColumn Header="Пароль" Binding="{Binding Password}" Width="*"/>
+                <DataGridTextColumn Header="Доступи" Binding="{Binding PermissionSummary}" Width="2*"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
-            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
-                <Button Content="Додати нового" Command="{Binding AddNewCommand}" Padding="10,5"/>
-                <Button Content="Видалити обраного" Command="{Binding DeleteCommand}" Margin="10,0,0,0" Padding="10,5"/>
-            </StackPanel>
+        <GridSplitter Grid.Column="1" Grid.Row="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="LightGray"/>
 
-        </Grid>
-
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="LightGray"/>
-
-        <Border Grid.Column="2" Margin="10,0,0,0" 
+        <Border Grid.Column="2" Grid.Row="1"
+                Margin="5,0,0,0" 
                 IsEnabled="{Binding EditingUser, Converter={StaticResource NullToFalseConverter}}"
                 BorderBrush="Gray" BorderThickness="1" Padding="10">
             <Grid>
@@ -54,7 +56,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
@@ -63,12 +65,12 @@
                 <StackPanel Grid.Row="1">
                     <TextBlock Text="Логін:"/>
                     <TextBox Text="{Binding EditingUser.Login, UpdateSourceTrigger=PropertyChanged}" 
-                             IsEnabled="{Binding EditingUser.LoginIsEditable}"
-                             Margin="0,2,0,10"/>
+                                 IsEnabled="{Binding EditingUser.LoginIsEditable}"
+                                 Margin="0,2,0,10"/>
 
                     <TextBlock Text="Пароль:"/>
                     <TextBox Text="{Binding EditingUser.Password, UpdateSourceTrigger=PropertyChanged}" 
-                             Margin="0,2,0,10"/>
+                                 Margin="0,2,0,10"/>
                 </StackPanel>
 
                 <TextBlock Grid.Row="2" Text="Права доступу:" Margin="0,10,0,5"/>
@@ -95,18 +97,19 @@
                     <CheckBox IsChecked="{Binding EditingUser.DiskC_E}" HorizontalAlignment="Center"/>
                 </UniformGrid>
 
-                <StackPanel Grid.Row="5" VerticalAlignment="Bottom">
-                    <Button Content="Зберегти зміни" Command="{Binding SaveCommand}" Padding="10,5" HorizontalAlignment="Left"
-                            Style="{DynamicResource MaterialDesignRaisedButton}"/>
-                </StackPanel>
-
+                <Button Grid.Row="4" Content="Зберегти зміни" Command="{Binding SaveCommand}" Padding="10,5"
+                    HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                    Margin="0,15,0,0"/>
             </Grid>
         </Border>
 
-        <Button Grid.Column="2" Content="Вийти з режиму Адміністратора" 
-                Command="{Binding LogoutCommand}" 
-                VerticalAlignment="Bottom" HorizontalAlignment="Right" 
-                Margin="10" Padding="5"/>
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+                <Button Content="Додати нового" Command="{Binding AddNewCommand}" Padding="10,5"/>
+                <Button Content="Видалити обраного" Command="{Binding DeleteCommand}" Margin="10,0,0,0" Padding="10,5"/>
+            </StackPanel>
+
+        </StackPanel>
 
     </Grid>
 </UserControl>

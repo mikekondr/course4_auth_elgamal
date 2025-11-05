@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using auth_elgamal.ViewModels; // Потрібно для UserEntryViewModel
 using System.IO;
-using System.Linq;
-using auth_elgamal.ViewModels; // Потрібно для UserEntryViewModel
 
 namespace auth_elgamal.Services
 {

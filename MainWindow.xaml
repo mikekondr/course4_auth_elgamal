@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:auth_elgamal.ViewModels"
         xmlns:local="clr-namespace:auth_elgamal"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="MainWindow" Height="450" Width="800"
+        Title="MainWindow" Height="450" Width="850"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Regular"
@@ -20,11 +21,29 @@
     <Grid>
 
         <ContentControl Content="{Binding CurrentViewModel}" />
-    
+
         <materialDesign:Snackbar
-                MessageQueue="{Binding NotificationQueue}"
-                VerticalAlignment="Bottom"
-                HorizontalAlignment="Left"
-                Margin="15"/>
+            MessageQueue="{Binding NotificationQueue}"
+            VerticalAlignment="Bottom"
+            HorizontalAlignment="Right"
+            Margin="15"
+    
+            Background="Transparent"
+            Padding="0"
+            BorderThickness="0">
+
+            <materialDesign:Snackbar.Resources>
+                <DataTemplate DataType="{x:Type sys:String}">
+                    <Border Background="{DynamicResource MaterialDesignSnackbarBackground}"
+                            CornerRadius="4" MinWidth="288" MaxWidth="568">
+                        <TextBlock Text="{Binding}"
+                                   Margin="16,14"
+                                   Foreground="{DynamicResource MaterialDesignSnackbarForeground}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                </DataTemplate>
+            </materialDesign:Snackbar.Resources>
+
+        </materialDesign:Snackbar>
     </Grid>
 </Window>

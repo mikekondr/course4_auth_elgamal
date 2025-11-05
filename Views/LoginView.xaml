@@ -5,22 +5,23 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     mc:Ignorable="d" 
     d:DesignHeight="300"
-    d:DesignWidth="300">
+    d:DesignWidth="300"
+    FocusManager.FocusedElement="{Binding ElementName=txtUsername}">
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
         <TextBlock Text="Авторизація" FontSize="20" Margin="10"/>
 
-        <TextBox Width="200" Margin="5" 
+        <TextBox x:Name="txtUsername" Width="200" Margin="5" 
                  Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <PasswordBox x:Name="txtPassword" Width="200" Margin="5"/>
+    <PasswordBox x:Name="txtPassword" Width="200" Margin="5"/>
 
-        <Button Content="Увійти" Width="100" Margin="10" 
+    <Button Content="Увійти" Width="100" Margin="10" 
                 Command="{Binding LoginCommand}" 
                 CommandParameter="{Binding ElementName=txtPassword}"
                 IsDefault="True"/>
 
-        <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" 
+    <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" 
                    Margin="5" TextWrapping="Wrap" Width="200"
                    HorizontalAlignment="Center" TextAlignment="Center"/>
 
