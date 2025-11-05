@@ -1,4 +1,5 @@
 ﻿using auth_elgamal.Models;
+using auth_elgamal.Services;
 using MaterialDesignThemes.Wpf;
 using System.Windows.Input;
 
@@ -68,6 +69,7 @@ namespace auth_elgamal.ViewModels
             // При виході (GoToLogin) - очищуємо сесію
             GoToLoginCommand = new RelayCommand(_ =>
             {
+                LoggingService.Instance.LogEvent(CurrentUser.Login, "Вихід із системи");
                 CurrentUser = null; // <-- ОЧИЩЕННЯ
                 CurrentViewModel = _loginVM;
             });

@@ -60,6 +60,7 @@ namespace auth_elgamal.ViewModels
             if (user != null)
             {
                 // Успіх! Зберігаємо користувача у головній VM
+                LoggingService.Instance.LogEvent(Username, "Успішна авторизація");
                 _mainVM.CurrentUser = user;
 
                 // Переходимо на потрібний екран
@@ -78,6 +79,7 @@ namespace auth_elgamal.ViewModels
             else
             {
                 // Помилка
+                LoggingService.Instance.LogEvent(Username, "Помилка авторизації (невірний логін або пароль)");
                 ErrorMessage = "Невірний логін або пароль.";
             }
         }

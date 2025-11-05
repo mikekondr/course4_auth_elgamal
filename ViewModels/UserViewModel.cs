@@ -1,8 +1,7 @@
 ﻿using auth_elgamal.Models;
+using auth_elgamal.Services;
 using MaterialDesignThemes.Wpf;
 using System.Windows.Input;
-using auth_elgamal.Models;
-using auth_elgamal.ViewModels.SubViewModels;
 
 namespace auth_elgamal.ViewModels
 {
@@ -58,6 +57,8 @@ namespace auth_elgamal.ViewModels
 
         private void ActivateDrives(object obj)
         {
+            LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, "Перехід до розділу дисків");
+
             // 1. Активуємо VM, передаючи їй поточного користувача
             _driveVM.Activate(_mainVM.CurrentUser);
 
@@ -70,7 +71,7 @@ namespace auth_elgamal.ViewModels
         {
             if (CurrentUser != null)
             {
-                WelcomeMessage = $"Вітаємо, {CurrentUser.Login}!";
+                WelcomeMessage = $"Привіт, {CurrentUser.Login}!";
             }
 
             ActivateDrives(null);

@@ -1,13 +1,14 @@
-﻿using System.Collections.ObjectModel;
-using auth_elgamal.Models; // Потрібно для User
+﻿using auth_elgamal.Models; // Потрібно для User
 using auth_elgamal.ViewModels.SubViewModels; // Потрібно для DiskViewModel
 using MaterialDesignThemes.Wpf; // Потрібно для Snackbar
+using System.Collections.ObjectModel;
 
 namespace auth_elgamal.ViewModels
 {
     public class DriveViewModel : BaseViewModel
     {
         private readonly ISnackbarMessageQueue _notificationQueue;
+        private string _currentUserLogin;
 
         // Сюди будуть прив'язані картки
         public ObservableCollection<DiskViewModel> Disks { get; }
@@ -28,11 +29,9 @@ namespace auth_elgamal.ViewModels
             // Очищуємо диски від попереднього користувача
             Disks.Clear();
 
-            if (currentUser == null || currentUser.IsAdmin)
-            {
-                // Адміністратор або невідомий користувач (не має доступу до цього розділу)
-                return;
-            }
+            if (currentUser == null || currentUser.IsAdmin) return;
+
+            _currentUserLogin = currentUser.Login;
 
             // Проходимо по словнику прав користувача (напр., Key="A", Value="RWE")
             foreach (var permission in currentUser.Permissions)
@@ -42,7 +41,7 @@ namespace auth_elgamal.ViewModels
 
                 // Створюємо ViewModel для одного диска (картки)
                 // і передаємо йому чергу сповіщень
-                Disks.Add(new DiskViewModel(diskLetter, rights, _notificationQueue));
+                Disks.Add(new DiskViewModel(diskLetter, rights, _notificationQueue, _currentUserLogin));
             }
         }
     }

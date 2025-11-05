@@ -142,6 +142,7 @@ namespace auth_elgamal.ViewModels
             // Зберігаємо зміни у файл
             if (_userService.SaveUsers(Users))
             {
+                LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, $"Видалено користувача: {strLogin}"); // <-- ДОДАЙТЕ ЦЕ
                 _notificationQueue.Enqueue(new SuccessNotification { Message = $"Користувача {strLogin} видалено." });
             }
             else
@@ -182,6 +183,7 @@ namespace auth_elgamal.ViewModels
                 {
                     // Оновлюємо властивості існуючого об'єкта
                     originalUser.UpdateFrom(EditingUser);
+                    LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, $"Змінено дані користувача: {savedLogin}");
                 }
             }
             else
@@ -204,6 +206,7 @@ namespace auth_elgamal.ViewModels
 
                 EditingUser.LoginIsEditable = false;
                 Users.Add(EditingUser);
+                LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, $"Створено нового користувача: {savedLogin}");
                 AddNewCommand.RaiseCanExecuteChanged(); // Оновлюємо стан кнопки "Додати"
             }
 
