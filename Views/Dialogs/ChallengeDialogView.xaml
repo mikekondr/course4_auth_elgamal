@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="auth_elgamal.Views.Dialogs.ChallengeDialogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="250" d:DesignWidth="400"
+             MaxWidth="400">
+    <StackPanel Margin="20">
+
+        <materialDesign:PackIcon Kind="HelpCircleOutline" 
+                                 HorizontalAlignment="Center" 
+                                 Width="40" Height="40" 
+                                 Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+
+        <TextBlock Text="Контрольне запитання" 
+                   Style="{StaticResource MaterialDesignHeadline6TextBlock}" 
+                   HorizontalAlignment="Center" Margin="0,5,0,0"/>
+
+        <TextBlock Text="Для підтвердження вашої присутності, будь ласка, обчисліть:"
+                   TextWrapping="Wrap" TextAlignment="Center" Margin="0,10,0,0"/>
+
+        <TextBlock Text="F = 4 * x^0.85" 
+                   FontSize="16" FontWeight="Bold" 
+                   HorizontalAlignment="Center" Margin="0,10,0,0"/>
+
+        <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0">
+            <Run Text="Ваше контрольне число (x):"/>
+            <Run Text="{Binding X_Value}" FontWeight="Bold" FontSize="16"/>
+        </TextBlock>
+
+        <TextBox Text="{Binding Answer, UpdateSourceTrigger=PropertyChanged}"
+                 materialDesign:HintAssist.Hint="Введіть F (до 2 знаків після коми)"
+                 Margin="0,15,0,0"
+                 HorizontalAlignment="Center"
+                 MinWidth="200"/>
+
+        <Button Content="Відповісти"
+                Margin="0,20,0,0"
+                IsDefault="True"
+                HorizontalAlignment="Center"
+                
+                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                CommandParameter="{Binding}"/>
+    </StackPanel>
+</UserControl>

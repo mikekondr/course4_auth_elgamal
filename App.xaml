@@ -6,6 +6,8 @@
              xmlns:v="clr-namespace:auth_elgamal.Views"
              xmlns:converters="clr-namespace:auth_elgamal.Converters"
              xmlns:notifications="clr-namespace:auth_elgamal.Models.Notifications"
+             xmlns:dialogsVM="clr-namespace:auth_elgamal.ViewModels.Dialogs"
+             xmlns:dialogsV="clr-namespace:auth_elgamal.Views.Dialogs"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
@@ -32,6 +34,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:EncryptionViewModel}">
                 <v:EncryptionView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type dialogsVM:ChallengeDialogViewModel}">
+                <dialogsV:ChallengeDialogView/>
             </DataTemplate>
 
             <DataTemplate DataType="{x:Type notifications:SuccessNotification}">
