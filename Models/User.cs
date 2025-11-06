@@ -1,11 +1,14 @@
 ﻿namespace auth_elgamal.Models
 {
+    /// <summary>
+    /// Клас, що представляє користувача з його правами доступу.
+    /// </summary>
     public class User
     {
         public string Login { get; set; }
         public bool IsAdmin { get; set; } = false;
 
-        // Key: Drive Letter (e.g., "A"), Value: Permissions (e.g., "RWE")
+        // Ключ: Буква диску ("A", "В", "С"), значення: права доступу ("RWE")
         public Dictionary<string, string> Permissions { get; private set; }
             = new Dictionary<string, string>();
 
@@ -17,12 +20,13 @@
         }
 
         // Конструктор для адміністратора
-        public User(string login, bool isAdmin)
+        public User(string login, bool isAdmin = true)
         {
             Login = login;
             IsAdmin = isAdmin;
         }
 
+        // розбирає рядок прав доступу у словник
         private void ParsePermissions(string permString)
         {
             if (string.IsNullOrEmpty(permString)) return;

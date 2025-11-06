@@ -5,6 +5,9 @@ using System.Windows.Input;
 
 namespace auth_elgamal.ViewModels
 {
+    /// <summary>
+    /// Логіка авторизації користувача (інтерфейс ViewModel)
+    /// </summary>
     public class LoginViewModel : BaseViewModel
     {
         private readonly MainWindowViewModel _mainVM;
@@ -33,7 +36,6 @@ namespace auth_elgamal.ViewModels
             _mainVM = mainVM;
             _authService = new AuthService();
 
-            // Ми передаємо параметр (PasswordBox) у команду
             LoginCommand = new RelayCommand(Login, CanLogin);
         }
 
@@ -54,7 +56,7 @@ namespace auth_elgamal.ViewModels
 
             string password = passwordBox.Password;
 
-            // Викликаємо сервіс для валідації
+            // Викликаємо сервіс авториазції для валідації даних
             User user = _authService.ValidateUser(Username, password);
 
             if (user != null)
@@ -73,7 +75,7 @@ namespace auth_elgamal.ViewModels
                     _mainVM.GoToUserCommand.Execute(null);
                 }
 
-                // Очищуємо поля
+                // Очищуємо поля, щоб після повернення на екран логіну вони були порожні
                 ClearCredentials(passwordBox);
             }
             else

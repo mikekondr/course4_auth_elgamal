@@ -7,12 +7,15 @@ namespace auth_elgamal.ViewModels
 {
     public class AdminViewModel : BaseViewModel
     {
+        private const int MAX_USERS = 14;
+
         private readonly MainWindowViewModel _mainVM;
         private readonly UserService _userService;
         private readonly ISnackbarMessageQueue _notificationQueue;
 
-        // --- Колекції та Виділення ---
         public ObservableCollection<UserEntryViewModel> Users { get; }
+
+        private bool _isEditingExistingUser = false;
 
         private UserEntryViewModel _selectedUser;
         public UserEntryViewModel SelectedUser
@@ -23,7 +26,7 @@ namespace auth_elgamal.ViewModels
                 _selectedUser = value;
                 OnPropertyChanged();
 
-                // Коли ми обираємо користувача, ми копіюємо його
+                // Коли ми обираємо користувача у списку, ми копіюємо його
                 // дані у 'EditingUser' для безпечного редагування
                 CopySelectedToEditing();
 
@@ -33,28 +36,33 @@ namespace auth_elgamal.ViewModels
         }
 
         private UserEntryViewModel _editingUser;
+
         // Цей об'єкт прив'язаний до полів редагування
         public UserEntryViewModel EditingUser
         {
             get => _editingUser;
-            set { _editingUser = value; OnPropertyChanged(); }
+            set
+            {
+                _editingUser = value;
+                OnPropertyChanged();
+            }
         }
 
         private string _editingPanelHeader = "Оберіть користувача або додайте нового";
         public string EditingPanelHeader
         {
             get => _editingPanelHeader;
-            set { _editingPanelHeader = value; OnPropertyChanged(); }
+            set
+            {
+                _editingPanelHeader = value;
+                OnPropertyChanged();
+            }
         }
 
-        // --- Команди ---
         public RelayCommand LogoutCommand { get; }
         public RelayCommand AddNewCommand { get; }
         public RelayCommand DeleteCommand { get; }
         public RelayCommand SaveCommand { get; }
-
-        private bool _isEditingExistingUser = false;
-        private const int MAX_USERS = 14;
 
         public AdminViewModel(MainWindowViewModel mainVM, ISnackbarMessageQueue notificationQueue)
         {
@@ -63,7 +71,6 @@ namespace auth_elgamal.ViewModels
             _notificationQueue = notificationQueue;
             Users = new ObservableCollection<UserEntryViewModel>();
 
-            // Ініціалізація команд
             LogoutCommand = new RelayCommand(_ => _mainVM.GoToLoginCommand.Execute(null));
             AddNewCommand = new RelayCommand(AddNew, CanAddNew);
             DeleteCommand = new RelayCommand(Delete, CanDelete);
@@ -81,11 +88,9 @@ namespace auth_elgamal.ViewModels
             {
                 Users.Add(user);
             }
-            // Оновлюємо стан кнопки "Додати"
+
             AddNewCommand.RaiseCanExecuteChanged();
         }
-
-        // --- Логіка Команд ---
 
         private void CopySelectedToEditing()
         {
@@ -98,7 +103,7 @@ namespace auth_elgamal.ViewModels
             }
             else
             {
-                // Створюємо ГЛИБОКУ КОПІЮ для редагування
+                // Створюємо копію об'єкта користувача для редагування
                 EditingUser = new UserEntryViewModel(
                     SelectedUser.Login,
                     SelectedUser.Password,
@@ -110,12 +115,12 @@ namespace auth_elgamal.ViewModels
             SaveCommand.RaiseCanExecuteChanged();
         }
 
-        // --- Додати ---
         private bool CanAddNew(object obj)
         {
             // Не дозволяємо додавати, якщо досягнуто ліміту
             return Users.Count < MAX_USERS;
         }
+
         private void AddNew(object obj)
         {
             SelectedUser = null; // Знімаємо виділення з DataGrid
@@ -125,7 +130,6 @@ namespace auth_elgamal.ViewModels
             SaveCommand.RaiseCanExecuteChanged();
         }
 
-        // --- Видалити ---
         private bool CanDelete(object obj)
         {
             // Можна видалити, тільки якщо хтось виділений
@@ -135,35 +139,33 @@ namespace auth_elgamal.ViewModels
         {
             if (SelectedUser == null) return;
 
-            // Видаляємо з колекції (UI оновиться)
             string strLogin = SelectedUser.Login;
             Users.Remove(SelectedUser);
 
             // Зберігаємо зміни у файл
             if (_userService.SaveUsers(Users))
             {
-                LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, $"Видалено користувача: {strLogin}"); // <-- ДОДАЙТЕ ЦЕ
+                LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, $"Видалено користувача: {strLogin}");
                 _notificationQueue.Enqueue(new SuccessNotification { Message = $"Користувача {strLogin} видалено." });
             }
             else
             {
                 _notificationQueue.Enqueue(new ErrorNotification { Message = "Помилка: не вдалося зберегти зміни." });
-                LoadUsersList(); // Відновлюємо список з файлу
+                LoadUsersList(); // Оновлюємо список з файлу
             }
 
             SelectedUser = null; // Очищуємо виділення
-            AddNewCommand.RaiseCanExecuteChanged(); // Перевіряємо ліміт
+            AddNewCommand.RaiseCanExecuteChanged();
         }
 
-        // --- Зберегти ---
         private bool CanSave(object obj)
         {
             // Можна зберегти, тільки якщо панель редагування активна
             return EditingUser != null;
         }
+
         private void Save(object obj)
         {
-            // 1. Валідація
             if (string.IsNullOrWhiteSpace(EditingUser.Login) ||
                 string.IsNullOrWhiteSpace(EditingUser.Password))
             {
@@ -171,10 +173,8 @@ namespace auth_elgamal.ViewModels
                 return;
             }
 
-            // Зберігаємо логін, оскільки EditingUser скоро може стати null
             string savedLogin = EditingUser.Login;
 
-            // 2. Логіка збереження
             if (_isEditingExistingUser)
             {
                 // --- РЕДАГУВАННЯ ---
@@ -189,15 +189,12 @@ namespace auth_elgamal.ViewModels
             else
             {
                 // --- ДОДАВАННЯ ---
-                // Перевірка на дублікат логіну
-                if (Users.Any(u => u.Login.Equals(EditingUser.Login,
-                                 System.StringComparison.OrdinalIgnoreCase)))
+                if (Users.Any(u => u.Login.Equals(EditingUser.Login, System.StringComparison.OrdinalIgnoreCase)))
                 {
                     _notificationQueue.Enqueue(new ErrorNotification { Message = "Помилка: Користувач з таким логіном вже існує." });
                     return;
                 }
 
-                // Перевірка ліміту
                 if (!CanAddNew(null))
                 {
                     _notificationQueue.Enqueue(new ErrorNotification { Message = "Помилка: Досягнуто ліміту користувачів (14)." });
@@ -207,13 +204,11 @@ namespace auth_elgamal.ViewModels
                 EditingUser.LoginIsEditable = false;
                 Users.Add(EditingUser);
                 LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, $"Створено нового користувача: {savedLogin}");
-                AddNewCommand.RaiseCanExecuteChanged(); // Оновлюємо стан кнопки "Додати"
+                AddNewCommand.RaiseCanExecuteChanged();
             }
 
-            // 3. Запис у файл
             if (_userService.SaveUsers(Users))
             {
-                // Встановлюємо повідомлення про успіх
                 _notificationQueue.Enqueue(new SuccessNotification { Message = $"Дані {savedLogin} збережено." });
             }
             else
@@ -223,12 +218,6 @@ namespace auth_elgamal.ViewModels
                 return;
             }
 
-            // 4. --- РЕАЛІЗАЦІЯ ВАШОГО ЗАПИТУ ---
-            // Скидаємо виділення рядка в таблиці.
-            // Це автоматично викличе setter 'SelectedUser', 
-            // який викличе 'CopySelectedToEditing', 
-            // який, побачивши 'SelectedUser == null', встановить 'EditingUser = null'.
-            // А 'EditingUser = null' автоматично очистить і заблокує форму.
             SelectedUser = null;
         }
     }

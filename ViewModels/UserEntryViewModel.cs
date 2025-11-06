@@ -2,7 +2,7 @@
 
 namespace auth_elgamal.ViewModels
 {
-    // Цей клас представляє ОДИН РЯДОК у файлі nameuser.txt
+    // Цей клас представляє один рядок у файлі nameuser.txt
     // і використовується для прив'язки до DataGrid та полів редагування
     public class UserEntryViewModel : BaseViewModel
     {
@@ -55,12 +55,8 @@ namespace auth_elgamal.ViewModels
         public bool DiskC_E { get => _diskC_E; set { _diskC_E = value; OnPropertyChanged(); OnPropertyChanged(nameof(PermissionSummary)); } }
 
 
-        // --- Конструктори та Методи ---
-
-        // Конструктор для нового, порожнього користувача
         public UserEntryViewModel() { }
 
-        // Конструктор для існуючого користувача (з файлу)
         public UserEntryViewModel(string login, string password, string permString)
         {
             Login = login;
@@ -69,7 +65,6 @@ namespace auth_elgamal.ViewModels
             ParsePermissions(permString);
         }
 
-        // Властивість для колонки "Permissions" у DataGrid
         public string PermissionSummary => GetPermissionString();
 
         // Розбирає рядок "A=RWE,C=R" у 9 прапорців
@@ -124,12 +119,11 @@ namespace auth_elgamal.ViewModels
             string cPerms = (DiskC_R ? "R" : "") + (DiskC_W ? "W" : "") + (DiskC_E ? "E" : "");
             if (cPerms.Length > 0) sb.Append($"C={cPerms},");
 
-            return sb.ToString().TrimEnd(','); // Видаляємо останню кому
+            return sb.ToString().TrimEnd(',');
         }
 
         public void UpdateFrom(UserEntryViewModel source)
         {
-            // Ми НЕ оновлюємо Login, оскільки це наш "ключ"
             this.Password = source.Password;
 
             this.DiskA_R = source.DiskA_R;
@@ -143,9 +137,6 @@ namespace auth_elgamal.ViewModels
             this.DiskC_R = source.DiskC_R;
             this.DiskC_W = source.DiskC_W;
             this.DiskC_E = source.DiskC_E;
-
-            // OnPropertyChanged(nameof(PermissionSummary)) 
-            // спрацює автоматично завдяки сеттерам окремих властивостей.
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace auth_elgamal.ViewModels.Dialogs
 {
-    // Ця VM передає дані У діалог і забирає відповідь
+    // Ця VM передає дані у діалог і забирає відповідь
     public class ChallengeDialogViewModel : BaseViewModel
     {
         // ВХІДНІ ДАНІ (випадкове число x)

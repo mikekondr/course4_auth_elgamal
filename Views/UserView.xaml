@@ -37,51 +37,31 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <TabControl Grid.Row="1"
+                    Margin="5"
+                    SelectedIndex="{Binding SelectedTabIndex}">
 
-            <Border Grid.Column="0" 
-                    Background="{DynamicResource MaterialDesignPaper}" 
-                    Effect="{DynamicResource MaterialDesignShadowDepth.Depth1}">
+            <TabItem>
+                <ContentControl Content="{Binding DriveVM}"/>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Harddisk" Margin="0,0,5,0"/>
+                        <TextBlock Text="Доступ до дисків"/>
+                    </StackPanel>
+                </TabItem.Header>
+            </TabItem>
 
-                <StackPanel Width="225">
-                    <ListBox Style="{DynamicResource MaterialDesignNavigationListBox}">
+            <TabItem>
+                <ContentControl Content="{Binding EncryptionVM}"/>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Lock" Margin="0,0,5,0"/>
+                        <TextBlock Text="Шифрування"/>
+                    </StackPanel>
+                </TabItem.Header>
+            </TabItem>
 
-                        <ListBoxItem HorizontalContentAlignment="Stretch">
-                            <ListBoxItem.InputBindings>
-                                <MouseBinding MouseAction="LeftClick" 
-                                              Command="{Binding GoToDrivesCommand}"/>
-                            </ListBoxItem.InputBindings>
-
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Harddisk" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Доступ до дисків"/>
-                            </StackPanel>
-                        </ListBoxItem>
-
-                        <ListBoxItem HorizontalContentAlignment="Stretch">
-                            <ListBoxItem.InputBindings>
-                                <MouseBinding MouseAction="LeftClick" 
-                                              Command="{Binding GoToEncryptionCommand}"/>
-                            </ListBoxItem.InputBindings>
-
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Lock" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Шифрування"/>
-                            </StackPanel>
-                        </ListBoxItem>
-
-                    </ListBox>
-                </StackPanel>
-            </Border>
-
-            <ContentControl Grid.Column="1" 
-                            Content="{Binding CurrentSubViewModel}"
-                            Margin="10"/>
-        </Grid>
+        </TabControl>
 
     </Grid>
 </UserControl>

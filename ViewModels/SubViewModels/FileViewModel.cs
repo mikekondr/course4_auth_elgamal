@@ -17,7 +17,6 @@ namespace auth_elgamal.ViewModels.SubViewModels
             set { _fileName = value; OnPropertyChanged(); }
         }
 
-        // Команда для прив'язки до кнопки
         public ICommand ReadFileCommand { get; }
 
         public FileViewModel(string fileName, ISnackbarMessageQueue notificationQueue, string currentUserLogin)
@@ -26,18 +25,14 @@ namespace auth_elgamal.ViewModels.SubViewModels
             _notificationQueue = notificationQueue;
             _currentUserLogin = currentUserLogin;
 
-            // Ініціалізуємо команду
             ReadFileCommand = new RelayCommand(ReadFile);
         }
 
         private void ReadFile(object obj)
         {
             LoggingService.Instance.LogEvent(_currentUserLogin, $"Прочитано файл: {FileName}");
-            // Імітація читання: відправляємо сповіщення
-            _notificationQueue.Enqueue(new SuccessNotification
-            {
-                Message = $"Прочитано файл: {FileName}"
-            });
+            // Імітація читання файлу
+            _notificationQueue.Enqueue(new SuccessNotification { Message = $"Прочитано файл: {FileName}" });
         }
     }
 }

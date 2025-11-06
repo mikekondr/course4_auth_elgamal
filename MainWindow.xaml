@@ -8,22 +8,29 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="MainWindow" Height="650" Width="850"
+        Title="Авториація та шифрування Ель-Гамал" Height="675" Width="875"
         Icon="/favicon.ico"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
         FontFamily="{materialDesign:MaterialDesignFont}">
+    
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+    
     <Window.DataContext>
         <vm:MainWindowViewModel/>
     </Window.DataContext>
 
-    <materialDesign:DialogHost Identifier="RootDialogHost">
-        <Grid>
-            <ContentControl Content="{Binding CurrentViewModel}" />
+    <Grid>
 
-            <materialDesign:Snackbar
+        <materialDesign:DialogHost Identifier="RootDialogHost">
+            <Grid>
+                <ContentControl Content="{Binding CurrentViewModel}" />
+
+                <materialDesign:Snackbar
                 MessageQueue="{Binding NotificationQueue}"
                 VerticalAlignment="Bottom"
                 HorizontalAlignment="Right"
@@ -33,19 +40,34 @@
                 Padding="0"
                 BorderThickness="0">
 
-                <materialDesign:Snackbar.Resources>
-                    <DataTemplate DataType="{x:Type sys:String}">
-                        <Border Background="{DynamicResource MaterialDesignSnackbarBackground}"
+                    <materialDesign:Snackbar.Resources>
+                        <DataTemplate DataType="{x:Type sys:String}">
+                            <Border Background="{DynamicResource MaterialDesignSnackbarBackground}"
                                 CornerRadius="4" MinWidth="288" MaxWidth="568">
-                            <TextBlock Text="{Binding}"
+                                <TextBlock Text="{Binding}"
                                        Margin="16,10"
                                        Foreground="{DynamicResource MaterialDesignSnackbarForeground}"
                                        TextWrapping="Wrap"/>
-                        </Border>
-                    </DataTemplate>
-                </materialDesign:Snackbar.Resources>
+                            </Border>
+                        </DataTemplate>
+                    </materialDesign:Snackbar.Resources>
 
-            </materialDesign:Snackbar>
+                </materialDesign:Snackbar>
+            </Grid>
+
+            
+        </materialDesign:DialogHost>
+
+        <Grid Grid.IsSharedSizeScope="True" 
+              Grid.ZIndex="999"
+              Background="#88000000" 
+              Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+
+            <ProgressBar Style="{DynamicResource MaterialDesignCircularProgressBar}" 
+                         IsIndeterminate="True" 
+                         Width="60" Height="60" 
+                         VerticalAlignment="Center" 
+                         HorizontalAlignment="Center"/>
         </Grid>
-    </materialDesign:DialogHost>
+    </Grid>
 </Window>

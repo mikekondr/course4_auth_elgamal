@@ -3,12 +3,14 @@ using System.Windows.Data;
 
 namespace auth_elgamal.Converters
 {
+    /// <summary>
+    /// Конвертує значення null у false та будь-яке інше значення у true.
+    /// для керування активністю панелі в залежності від наявності даних.
+    /// </summary>
     public class NullToFalseConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Якщо value не null, повертаємо true (панель активна)
-            // Якщо value є null, повертаємо false (панель вимкнена)
             return value != null;
         }
 

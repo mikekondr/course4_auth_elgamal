@@ -35,7 +35,6 @@
                      VerticalScrollBarVisibility="Auto"
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
-
             <Grid Grid.Row="3" Margin="0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -45,21 +44,19 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
 
                     <Button Content="Зашифрувати"
-                Command="{Binding EncryptCommand}"
-                Style="{DynamicResource MaterialDesignRaisedButton}"/>
+                            Command="{Binding EncryptCommand}"
+                            Style="{DynamicResource MaterialDesignRaisedButton}"/>
 
                     <Button Content="Розшифрувати"
-                Command="{Binding DecryptCommand}"
-                Style="{DynamicResource MaterialDesignRaisedSecondaryButton}"
-                Margin="10,0,0,0"/>
+                            Command="{Binding DecryptCommand}"
+                            Style="{DynamicResource MaterialDesignRaisedSecondaryButton}"
+                            Margin="10,0,0,0"/>
 
                     <Button Content="Очистити"
-                Command="{Binding ClearCommand}"
-                
-                Style="{DynamicResource MaterialDesignFlatButton}"
-                Margin="10,0,0,0"/>
+                            Command="{Binding ClearCommand}"
+                            Style="{DynamicResource MaterialDesignFlatButton}"
+                            Margin="10,0,0,0"/>
                 </StackPanel>
-
 
                 <Button Grid.Column="1"
                     Style="{DynamicResource MaterialDesignFlatButton}"

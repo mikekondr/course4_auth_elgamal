@@ -1,15 +1,19 @@
 ﻿using auth_elgamal.Models;
 using auth_elgamal.Services;
+using auth_elgamal.ViewModels.Dialogs;
 using MaterialDesignThemes.Wpf;
 using System.Windows.Input;
-using System.Threading; // Для CancellationTokenSource
-using System.Threading.Tasks; // Для Task
-using auth_elgamal.ViewModels.Dialogs; // Для нашого діалогу
 
 namespace auth_elgamal.ViewModels
 {
+    /// <summary>
+    /// Головне вікно програми, яке керує навігацією між різними режимами (Login, Admin, User).
+    /// Тут же реалізовано логіку періодичної перевірки користувача у User режимі.
+    /// Підтримує Snackbar для повідомлень та індикатор завантаження.
+    /// </summary>
     public class MainWindowViewModel : BaseViewModel
     {
+        // Властивості для навігації між режимами
         private BaseViewModel _currentViewModel;
         private User _currentUser;
 
@@ -17,16 +21,32 @@ namespace auth_elgamal.ViewModels
         private readonly AdminViewModel _adminVM;
         private readonly UserViewModel _userVM;
 
-        // --- Логіка Перевірки Користувача ---
+        // Періодична перевірка користувача
+        // Відповідь - результат формули A * x^b
         private CancellationTokenSource _challengeCts;
         private readonly Random _random = new Random();
         private const double A_VALUE = 4.0;
         private const double EXPONENT = 0.85;
-        // ------------------------------------
 
+        // Флаг "заянятості" для індикатора завантаження
+        private bool _isBusy;
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                OnPropertyChanged();
+            }
+        }
+
+        // Делегат для показу/приховування індикатора завантаження
+        private readonly Action<bool> _showLoading;
+
+        // Черга повідомлень для Snackbar
         public ISnackbarMessageQueue NotificationQueue { get; }
 
-        // Властивість, до якої буде прив'язаний ContentControl
+        // Властивість, до якої прив'язаний ContentControl
         public BaseViewModel CurrentViewModel
         {
             get => _currentViewModel;
@@ -48,39 +68,40 @@ namespace auth_elgamal.ViewModels
             }
         }
 
-        // Команди для навігації (для прикладу)
-        // У реальному додатку вони б викликалися з дочірніх VM
+        // Команди навігації
         public ICommand GoToLoginCommand { get; }
         public ICommand GoToAdminCommand { get; }
         public ICommand GoToUserCommand { get; }
 
         public MainWindowViewModel()
         {
-            // 3. Ініціалізуйте чергу (тут: 3 секунди на кожне повідомлення)
+            // Ініціалізація черги повідомлень Snackbar
             NotificationQueue = new SnackbarMessageQueue(TimeSpan.FromSeconds(3));
 
-            // Створюємо екземпляри VM для кожного режиму
-            // Передаємо 'this', щоб дочірні VM могли викликати навігацію
-            _loginVM = new LoginViewModel(this); // Помилки логіну краще залишити inline
+            // Делегат для показу/приховування індикатора завантаження
+            _showLoading = (isLoading) => IsBusy = isLoading;
+
+            // екземпляри ViewModel для кожного режиму
+            _loginVM = new LoginViewModel(this);
             _adminVM = new AdminViewModel(this, NotificationQueue);
-            _userVM = new UserViewModel(this, NotificationQueue); // На майбутнє
+            _userVM = new UserViewModel(this, NotificationQueue, _showLoading);
 
             // При переході на AdminView...
-            GoToAdminCommand = new RelayCommand(_ => {
-                // Зупиняємо перевірку, коли входить адмін
-                StopChallengeLoop();
-
+            GoToAdminCommand = new RelayCommand(_ =>
+            {
                 CurrentViewModel = _adminVM;
+                // Зупиняємо періодичну перевірку користувача, коли входить адмін
+                StopChallengeLoop();
             });
 
             // При переході на UserView...
             GoToUserCommand = new RelayCommand(_ =>
             {
-                // ...ми "активуємо" UserVM, щоб вона оновила дані
-                _userVM.Activate();
                 CurrentViewModel = _userVM;
+                // "активуємо" UserViewModel, щоб оновились дані
+                _userVM.Activate();
 
-                // Запускаємо цикл перевірки для користувача
+                // Запускаємо цикл періодичної перевірки користувача
                 StartChallengeLoop();
             });
 
@@ -92,22 +113,17 @@ namespace auth_elgamal.ViewModels
 
                 LoggingService.Instance.LogEvent(CurrentUser.Login, "Вихід із системи");
 
-                CurrentUser = null; // Очищуємо поточного користувача
-
-                // Викликаємо очищення для всіх під-систем UserView
+                CurrentUser = null;
                 _userVM.ClearSessionData();
 
-                // (Опціонально: можна додати _adminVM.ClearSessionData(), якщо потрібно)
-
-                CurrentViewModel = _loginVM; // Переходимо на логін
+                CurrentViewModel = _loginVM;
             });
 
             // Початковий режим
             CurrentViewModel = _loginVM;
         }
 
-        // --- Методи циклу перевірки ---
-
+        // Запускає цикл періодичної перевірки користувача
         private void StartChallengeLoop()
         {
             // Зупиняємо попередній цикл, якщо він був
@@ -115,47 +131,48 @@ namespace auth_elgamal.ViewModels
 
             _challengeCts = new CancellationTokenSource();
 
-            // Запускаємо цикл у фоні, не блокуючи UI
+            // Запускаємо асинхронний цикл у фоні, не блокуючи UI
             _ = RunChallengeLoop(_challengeCts.Token);
         }
 
+        // Зупиняє цикл періодичної перевірки користувача
         private void StopChallengeLoop()
         {
             if (_challengeCts != null)
             {
-                _challengeCts.Cancel(); // Відправляємо сигнал скасування
+                _challengeCts.Cancel();
                 _challengeCts.Dispose();
                 _challengeCts = null;
             }
         }
 
+        // Асинхронний цикл періодичної перевірки користувача
         private async Task RunChallengeLoop(CancellationToken token)
         {
             try
             {
+                // Допоки не встановлено флаг скасування...
                 while (!token.IsCancellationRequested)
                 {
-                    // 1. Чекаємо випадковий час T
-                    // (Наприклад, від 30 до 60 секунд для тестування)
-                    // (Для релізу можна поставити 5-10 хвилин)
+                    // Чекаємо випадковий час T (від 30 до 60 секунд)
                     int waitSeconds = _random.Next(30, 61);
                     await Task.Delay(waitSeconds * 1000, token);
 
                     if (token.IsCancellationRequested) return;
 
-                    // 2. Генеруємо питання
-                    int x = _random.Next(1000, 10000); // Випадкове число x
-                    double correctAnswer = A_VALUE * Math.Pow(x, EXPONENT);
+                    // Генеруємо питання
+                    int x = _random.Next(100, 1000); // Випадкове число x
+                    double correctAnswer = A_VALUE * Math.Pow(x, EXPONENT); // Правильна відповідь
 
+                    // Діалог перевірки
                     var challengeVM = new ChallengeDialogViewModel { X_Value = x };
 
-                    // 3. Показуємо діалог (у UI-потоці)
-                    // Важливо: ми не можемо вийти з діалогу, не відповівши
+                    // Показ діалогу
                     var result = await DialogHost.Show(challengeVM, "RootDialogHost");
 
                     if (token.IsCancellationRequested) return;
 
-                    // 4. Перевіряємо відповідь
+                    // Перевіряємо відповідь
                     if (result is ChallengeDialogViewModel vm &&
                         double.TryParse(vm.Answer?.Replace('.', ','), out double userAnswer))
                     {
@@ -164,16 +181,15 @@ namespace auth_elgamal.ViewModels
                         {
                             // ПРАВИЛЬНО
                             LoggingService.Instance.LogEvent(CurrentUser.Login, $"Успішно пройшов перевірку (x={x})");
-                            // (Можна додати сповіщення про успіх)
                             NotificationQueue.Enqueue(new Models.Notifications.SuccessNotification { Message = "Перевірку пройдено." });
                         }
                         else
                         {
                             // НЕПРАВИЛЬНО
                             LoggingService.Instance.LogEvent(CurrentUser.Login, $"Помилка перевірки (x={x}, введено={userAnswer}, очікувалось={correctAnswer:F2})");
-                            await Task.Delay(300); // Даємо час Snackbar з'явитися
+                            await Task.Delay(300); // Даємо час для зникнення діалогу, щоб Snackbar з'явився
                             NotificationQueue.Enqueue(new Models.Notifications.ErrorNotification { Message = "Помилка перевірки. Доступ заборонено." });
-                            GoToLoginCommand.Execute(null); // Викидаємо користувача
+                            GoToLoginCommand.Execute(null); // Викидаємо користувача на сторінку входу
                         }
                     }
                     else
@@ -182,13 +198,13 @@ namespace auth_elgamal.ViewModels
                         LoggingService.Instance.LogEvent(CurrentUser.Login, $"Помилка перевірки (невірний формат відповіді)");
                         await Task.Delay(300);
                         NotificationQueue.Enqueue(new Models.Notifications.ErrorNotification { Message = "Невірний формат відповіді. Доступ заборонено." });
-                        GoToLoginCommand.Execute(null); // Викидаємо користувача
+                        GoToLoginCommand.Execute(null);
                     }
                 }
             }
             catch (TaskCanceledException)
             {
-                // Це нормально, цикл зупинився (напр., через вихід)
+                // Це нормально, цикл зупинився (напр., через вихід з програми)
             }
         }
     }

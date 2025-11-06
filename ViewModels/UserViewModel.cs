@@ -9,21 +9,41 @@ namespace auth_elgamal.ViewModels
     {
         private readonly MainWindowViewModel _mainVM;
         private readonly ISnackbarMessageQueue _notificationQueue;
+        private readonly Action<bool> _showLoading;
 
-        private BaseViewModel _currentSubViewModel; // Поточний обраний режим
+        public DriveViewModel DriveVM { get; }
+        public EncryptionViewModel EncryptionVM { get; }
 
-        private readonly DriveViewModel _driveVM;
-        private readonly EncryptionViewModel _encryptionVM;
-
+        private BaseViewModel _currentSubViewModel;
         public BaseViewModel CurrentSubViewModel
         {
             get => _currentSubViewModel;
-            set { _currentSubViewModel = value; OnPropertyChanged(); }
+            set
+            {
+                if (_currentSubViewModel == value) return;
+                _currentSubViewModel = value;
+                OnPropertyChanged();
+
+                OnPropertyChanged(nameof(SelectedTabIndex));
+            }
         }
 
-        // Команди для перемикання (будуть прив'язані до кнопок меню)
-        public ICommand GoToDrivesCommand { get; }
-        public ICommand GoToEncryptionCommand { get; }
+        public int SelectedTabIndex
+        {
+            get
+            {
+                if (CurrentSubViewModel is EncryptionViewModel)
+                    return 1;
+                return 0;
+            }
+            set
+            {
+                if (value == 1)
+                    ActivateEncryption(null);
+                else
+                    ActivateDrives(null);
+            }
+        }
 
         private string _welcomeMessage;
         public string WelcomeMessage
@@ -32,50 +52,41 @@ namespace auth_elgamal.ViewModels
             set { _welcomeMessage = value; OnPropertyChanged(); }
         }
 
-        // Властивість для прямого доступу до користувача (якщо потрібно)
         public User CurrentUser => _mainVM.CurrentUser;
 
         public ICommand LogoutCommand { get; }
 
-        public UserViewModel(MainWindowViewModel mainVM, ISnackbarMessageQueue notificationQueue)
+        public UserViewModel(MainWindowViewModel mainVM, ISnackbarMessageQueue notificationQueue, Action<bool> showLoading)
         {
             _mainVM = mainVM;
             _notificationQueue = notificationQueue;
+            _showLoading = showLoading;
+
             LogoutCommand = new RelayCommand(_ => _mainVM.GoToLoginCommand.Execute(null));
 
-            // Ініціалізуємо наші під-VM
-            _driveVM = new DriveViewModel(_notificationQueue);
-            _encryptionVM = new EncryptionViewModel(_notificationQueue);
+            DriveVM = new DriveViewModel(_notificationQueue);
+            EncryptionVM = new EncryptionViewModel(_notificationQueue, _showLoading);
 
-            // Ініціалізуємо команди
-            GoToDrivesCommand = new RelayCommand(ActivateDrives);
-            GoToEncryptionCommand = new RelayCommand(ActivateEncryption);
-
-            // Встановлюємо режим за замовчуванням (наприклад, диски)
-            CurrentSubViewModel = _driveVM;
+            CurrentSubViewModel = DriveVM;
         }
 
         private void ActivateDrives(object obj)
         {
             LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, "Перехід до розділу дисків");
 
-            // 1. Активуємо VM, передаючи їй поточного користувача
-            _driveVM.Activate(_mainVM.CurrentUser);
+            DriveVM.Activate(_mainVM.CurrentUser);
 
-            // 2. Встановлюємо її як поточний інтерфейс
-            CurrentSubViewModel = _driveVM;
+            CurrentSubViewModel = DriveVM;
         }
 
         private void ActivateEncryption(object obj)
         {
             LoggingService.Instance.LogEvent(_mainVM.CurrentUser.Login, "Перехід до розділу шифрування");
 
-            // "Активуємо" VM, передаючи їй поточного користувача
-            _encryptionVM.Activate(_mainVM.CurrentUser);
-            CurrentSubViewModel = _encryptionVM;
+            EncryptionVM.Activate(_mainVM.CurrentUser);
+            CurrentSubViewModel = EncryptionVM;
         }
 
-        // Цей метод викликається з MainWindowViewModel перед показом
         public void Activate()
         {
             if (CurrentUser != null)
@@ -86,22 +97,19 @@ namespace auth_elgamal.ViewModels
             ActivateDrives(null);
         }
 
-        /// <summary>
-        /// Очищує всі дані, пов'язані з сеансом користувача.
-        /// </summary>
         public void ClearSessionData()
         {
             // Очищуємо диски
-            _driveVM.ClearData();
+            DriveVM.ClearData();
 
             // Очищуємо шифрування
-            _encryptionVM.ClearAllData();
+            EncryptionVM.ClearAllData();
 
             // Скидаємо привітання
             WelcomeMessage = string.Empty;
 
             // Повертаємо на екран дисків за замовчуванням (для наступного користувача)
-            CurrentSubViewModel = _driveVM;
+            CurrentSubViewModel = DriveVM;
         }
     }
 }

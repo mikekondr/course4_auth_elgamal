@@ -7,6 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <Title>Авторизація та шифрування Ель-Гамал</Title>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,6 +2,9 @@
 
 namespace auth_elgamal.ViewModels
 {
+    /// <summary>
+    /// Клас реалізації інтерфейсу ICommand для прив'язки команд у MVVM.
+    /// </summary>
     public class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;

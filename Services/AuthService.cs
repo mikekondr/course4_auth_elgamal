@@ -2,14 +2,17 @@
 
 namespace auth_elgamal.Services
 {
+    /// <summary>
+    /// Сервіс авторизації користувачів
+    /// </summary>
     public class AuthService
     {
-        // AuthService тепер залежить від UserService, щоб отримати дані
+        // залежність від сервісу користувачів
         private readonly UserService _userService;
 
         public AuthService()
         {
-            _userService = new UserService(); // Створюємо екземпляр сервісу
+            _userService = new UserService();
         }
 
         /// <summary>
@@ -20,14 +23,13 @@ namespace auth_elgamal.Services
         {
             try
             {
-                // 1. Перевірка жорстко заданого адміністратора
+                // Визначені облікові дані адміністратора
                 if (login == "admin" && password == "admin_123")
                 {
-                    return new User("admin", true); // Повертаємо admin-користувача
+                    return new User("admin", true);
                 }
 
-                // 2. Пошук у файлі (через UserService)
-                // Отримуємо список всіх користувачів (у вигляді UserEntryViewModel)
+                // Пошук у файлі (через UserService)
                 var allUsers = _userService.LoadUsers();
 
                 // Шукаємо співпадіння логіна та пароля
@@ -37,19 +39,15 @@ namespace auth_elgamal.Services
 
                 if (foundUserEntry != null)
                 {
-                    // Знайшли!
-                    // Конвертуємо UserEntryViewModel назад у модель User,
-                    // яку очікує наша MainWindowViewModel.
                     return new User(foundUserEntry.Login, foundUserEntry.GetPermissionString());
                 }
             }
             catch (Exception ex)
             {
-                // Тут можна логувати помилку (наприклад, якщо UserService не зміг прочитати файл)
                 System.Diagnostics.Debug.WriteLine($"Auth Error: {ex.Message}");
             }
 
-            // 3. Якщо нічого не знайдено
+            // Користувач не знайдений або помилка
             return null;
         }
     }

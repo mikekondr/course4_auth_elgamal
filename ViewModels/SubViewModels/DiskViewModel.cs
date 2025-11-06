@@ -1,5 +1,5 @@
 ﻿using auth_elgamal.Services;
-using MaterialDesignThemes.Wpf; // Потрібно для Snackbar
+using MaterialDesignThemes.Wpf;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -7,7 +7,6 @@ namespace auth_elgamal.ViewModels.SubViewModels
 {
     public class DiskViewModel : BaseViewModel
     {
-        // --- Властивості для прив'язки до XAML ---
         public string DiskName { get; set; }
         public bool CanRead { get; set; }
         public bool CanWrite { get; set; }
@@ -15,11 +14,9 @@ namespace auth_elgamal.ViewModels.SubViewModels
 
         public ObservableCollection<FileViewModel> Files { get; set; }
 
-        // --- Команди ---
         public ICommand CreateFileCommand { get; }
         public ICommand ExecuteCommand { get; }
 
-        // Черга для сповіщень (ми її отримаємо ззовні)
         private readonly ISnackbarMessageQueue _notificationQueue;
 
         private readonly string _currentUserLogin;
@@ -41,13 +38,10 @@ namespace auth_elgamal.ViewModels.SubViewModels
             Files = new ObservableCollection<FileViewModel>();
 
             // 3. Ініціалізуємо команди
-            // Кнопки "Створити" та "Виконати" будуть увімкнені/вимкнені
-            // автоматично завдяки IsEnabled у XAML, але ми також 
-            // можемо передати 'CanWrite'/'CanExecute' у CanExecute делегат команди.
             CreateFileCommand = new RelayCommand(CreateFile, _ => CanWrite);
             ExecuteCommand = new RelayCommand(Execute, _ => CanExecute);
 
-            // 4. Завантажуємо "уявні" файли, якщо є право 'R'
+            // 4. Завантажуємо імітацію файлів, якщо є право 'R'
             if (CanRead)
             {
                 LoadDummyFiles(diskLetter, _notificationQueue, _currentUserLogin);
@@ -63,17 +57,13 @@ namespace auth_elgamal.ViewModels.SubViewModels
 
         private void CreateFile(object obj)
         {
-            // Імітація: додаємо новий файл до списку
+            // Додаємо новий файл до списку
             string newFileName = $"new_file_{Files.Count + 1}.txt";
             Files.Add(new FileViewModel(newFileName, _notificationQueue, _currentUserLogin));
 
             LoggingService.Instance.LogEvent(_currentUserLogin, $"Створено файл: {newFileName} на диску {DiskName}");
 
-            // Повідомляємо користувача
-            _notificationQueue.Enqueue(new Models.Notifications.SuccessNotification
-            {
-                Message = $"Файл {newFileName} створено на диску {DiskName}."
-            });
+            _notificationQueue.Enqueue(new Models.Notifications.SuccessNotification { Message = $"Файл {newFileName} створено на диску {DiskName}." });
         }
 
         private void Execute(object obj)
@@ -81,10 +71,7 @@ namespace auth_elgamal.ViewModels.SubViewModels
             LoggingService.Instance.LogEvent(_currentUserLogin, $"Виконано 'Execute' на диску {DiskName}");
 
             // Імітація: просто показуємо сповіщення
-            _notificationQueue.Enqueue(new Models.Notifications.SuccessNotification
-            {
-                Message = $"Виконання програми на диску {DiskName}..."
-            });
+            _notificationQueue.Enqueue(new Models.Notifications.SuccessNotification { Message = $"Виконання програми на диску {DiskName}..." });
         }
     }
 }

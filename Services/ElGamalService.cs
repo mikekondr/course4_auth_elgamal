@@ -1,57 +1,80 @@
-﻿using System.IO;
+﻿using auth_elgamal.Models.Keys;
+using System.IO;
 using System.Numerics;
-using System.Security.Cryptography;
-using System.Text;
-using auth_elgamal.Models.Keys;
 
 namespace auth_elgamal.Services
 {
+    /// <summary>
+    /// Сервіс для роботи з алгоритмом Ель-Гамаля
+    /// надає інтерфейс для генерації ключів, шифрування та розшифрування файлів.
+    /// </summary>
     public class ElGamalService
     {
-        // Розмір блоку в байтах (з вашого коду)
+        // розмір блоку в байтах
+        // розмір ключа 64 десяткових знаків ~ 216 біт ~ 27 байт
+        // тому беремо блок розміром 26 байт, щоб бути впевненими, що повідомлення менше ключа
         private const int BLOCK_SIZE = 26;
 
-        // --- 1. Керування ключами (з HandleGeneration) ---
-
+        // Генерація пари ключів
+        // ім'я користувача використовується для імен файлів ключів
         public bool GenerateKeys(string username)
         {
+            bool result = false;
             try
             {
                 string privateKeyFile = $"{username}.key";
                 string publicKeyFile = $"{username}.pub";
 
-                // Використовуємо вашу логіку генерації
-                (BigInteger p, BigInteger q) = ElGamal.GenerateSafePrime(64);
-                BigInteger g = ElGamal.GenerateG(p, q);
-                BigInteger x = ElGamal.GenerateRandomBigInteger(2, q);
+                // прості великі числа p і q
+                (BigInteger p, BigInteger q) = ElGamalCrypto.GenerateSafePrime(64);
+                // генератор g
+                BigInteger g = ElGamalCrypto.GenerateG(p, q);
+                // приватний ключ x
+                BigInteger x = ElGamalCrypto.GenerateRandomBigInteger(2, q);
+                // публічний ключ y
                 BigInteger y = BigInteger.ModPow(g, x, p);
 
-                // Збереження ключів (4 параметри)
-                File.WriteAllLines(privateKeyFile, new[] { p.ToString(), q.ToString(), g.ToString(), x.ToString() });
-                File.WriteAllLines(publicKeyFile, new[] { p.ToString(), q.ToString(), g.ToString(), y.ToString() });
+                // в обидва набори входять p, q, g, але приватний містить x, а публічний - y
+                File.WriteAllLines(privateKeyFile, [p.ToString(), q.ToString(), g.ToString(), x.ToString()]);
+                File.WriteAllLines(publicKeyFile, [p.ToString(), q.ToString(), g.ToString(), y.ToString()]);
 
-                return true;
+                result = true;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Key Gen Error: {ex.Message}");
-                return false;
             }
+
+            return result;
         }
 
-        public PrivateKey LoadPrivateKey(string username)
+        // оскільки формат файлів ключів однаковий, читання файлу також однакове
+        // помилка - повертає null
+        private string[]? LoadKeyFile(string filePath)
         {
-            string privateKeyPath = $"{username}.key";
-            if (!File.Exists(privateKeyPath))
+            string[]? result = null;
+            if (File.Exists(filePath))
             {
-                return null;
+                try
+                {
+                    result = File.ReadAllLines(filePath);
+                    if (result.Length < 4) result = null;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to load key file '{filePath}': {ex.Message}");
+                }
             }
+            return result;
+        }
+
+        public PrivateKey? LoadPrivateKey(string username)
+        {
+            string[]? keyLines = LoadKeyFile($"{username}.key");
+            if (keyLines == null) return null;
 
             try
             {
-                string[] keyLines = File.ReadAllLines(privateKeyPath);
-                if (keyLines.Length < 4) return null; // Неправильний формат
-
                 return new PrivateKey
                 {
                     P = BigInteger.Parse(keyLines[0]),
@@ -62,23 +85,18 @@ namespace auth_elgamal.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to load private key: {ex.Message}");
-                return null;
+                System.Diagnostics.Debug.WriteLine($"Failed to parse private key: {ex.Message}");
             }
+            return null;
         }
 
-        public PublicKey LoadPublicKey(string keyFilename)
+        public PublicKey? LoadPublicKey(string keyFilename)
         {
-            if (!File.Exists(keyFilename))
-            {
-                return null;
-            }
+            string[]? keyLines = LoadKeyFile(keyFilename);
+            if (keyLines == null) return null;
 
             try
             {
-                string[] keyLines = File.ReadAllLines(keyFilename);
-                if (keyLines.Length < 4) return null; // Неправильний формат
-
                 return new PublicKey
                 {
                     P = BigInteger.Parse(keyLines[0]),
@@ -89,34 +107,36 @@ namespace auth_elgamal.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to load public key: {ex.Message}");
-                return null;
+                System.Diagnostics.Debug.WriteLine($"Failed to parse public key: {ex.Message}");
             }
+            return null;
         }
 
-
-        // --- 2. Шифрування (з HandleEncryption, адаптовано для string) ---
-
+        // Шифрування файлу для адресата з використанням його публічного ключа
+        // та збереження результату в outputFile
         public void EncryptFile(string inputFile, PublicKey recipientKey, string outputFile)
         {
             if (recipientKey == null)
                 throw new ArgumentNullException(nameof(recipientKey), "Публічний ключ адресата не завантажено.");
 
-            // Беремо параметри з об'єкта ключа
             BigInteger p = recipientKey.P;
             BigInteger q = recipientKey.Q;
             BigInteger g = recipientKey.G;
             BigInteger y = recipientKey.Y;
 
+            // оригінальний розмір файлу зберігаємо в першому рядку файлу шифротексту
+            // для спрощення подальшого відновлення (розшифрування)
             long originalLength = new FileInfo(inputFile).Length;
 
-            using (StreamWriter writer = new StreamWriter(outputFile)) // Запис тексту (a, b)
+            using (StreamWriter writer = new StreamWriter(outputFile))
             using (FileStream fs = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
-            using (BinaryReader reader = new BinaryReader(fs)) // Читання байтів
+            using (BinaryReader reader = new BinaryReader(fs))
             {
+                // розмір повідомлення
                 writer.WriteLine(originalLength.ToString());
-
+                // буфер для читання блоків
                 byte[] buffer = new byte[BLOCK_SIZE];
+                // кількість прочитаних байт
                 int bytesRead;
 
                 while ((bytesRead = reader.Read(buffer, 0, BLOCK_SIZE)) > 0)
@@ -124,20 +144,30 @@ namespace auth_elgamal.Services
                     byte[] blockToEncrypt;
                     if (bytesRead < BLOCK_SIZE)
                     {
+                        //якщо прочитано менше, ніж розмір блоку, створюємо новий масив потрібного розміру
+                        //та копіюємо туди прочитані байти
+                        //решта байтів за замовчуванням буде нулями
                         blockToEncrypt = new byte[BLOCK_SIZE];
                         Array.Copy(buffer, blockToEncrypt, bytesRead);
                     }
                     else
                     {
+                        //інакше використовуємо повний блок
                         blockToEncrypt = buffer;
                     }
 
+                    //беззнакове велике ціле з блоку байтів
                     BigInteger m = new BigInteger(blockToEncrypt, isUnsigned: true);
+                    // переконуємося, що m не дорівнює нулю
+                    // оскільки в алгоритмі Ель-Гамаля m повинно бути в діапазоні [1, p-1]
                     if (m.IsZero) m = 1;
 
-                    // --- Шифрування (Ваша логіка) ---
-                    BigInteger k = ElGamal.GenerateRandomBigInteger(2, q);
+                    // сеансовий ключ k - випадкове ціле в діапазоні [2, q-1]
+                    BigInteger k = ElGamalCrypto.GenerateRandomBigInteger(2, q);
+                    // обчислення компонентів шифротексту
+                    // a = (g^k) mod p
                     BigInteger a = BigInteger.ModPow(g, k, p);
+                    // b = (y^k * m) mod p
                     BigInteger b = (BigInteger.ModPow(y, k, p) * m) % p;
 
                     writer.WriteLine(a.ToString());
@@ -146,19 +176,22 @@ namespace auth_elgamal.Services
             }
         }
 
-        // --- 3. Розшифрування (з HandleDecryption, адаптовано для string) ---
-
+        // Розшифрування вхідного файлу з використанням приватного ключа користувача
+        // та збереження результату в outputFile
         public void DecryptFile(string inputFile, PrivateKey userKey, string outputFile)
         {
             if (userKey == null)
                 throw new ArgumentNullException(nameof(userKey), "Приватний ключ не завантажено.");
 
-            // Беремо параметри з об'єкта ключа
             BigInteger p = userKey.P;
             BigInteger x = userKey.X;
 
-            string[] cipherLines = File.ReadAllLines(inputFile); // Читання тексту (a, b)
+            // всі рядки файлу шифротексту
+            string[] cipherLines = File.ReadAllLines(inputFile);
 
+            // перевірка цілісності файлу шифротексту
+            // перший рядок - оригінальна довжина файлу
+            // далі йдуть пари рядків (a, b)
             if (cipherLines.Length < 1 || (cipherLines.Length - 1) % 2 != 0)
             {
                 throw new InvalidDataException("Файл шифротексту пошкоджений (неправильна кількість рядків).");
@@ -168,21 +201,26 @@ namespace auth_elgamal.Services
             long totalBytesWritten = 0;
 
             using (FileStream fs = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
-            using (BinaryWriter writer = new BinaryWriter(fs)) // Запис байтів
+            using (BinaryWriter writer = new BinaryWriter(fs))
             {
                 for (int i = 1; i < cipherLines.Length; i += 2)
                 {
                     BigInteger a = BigInteger.Parse(cipherLines[i]);
                     BigInteger b = BigInteger.Parse(cipherLines[i + 1]);
 
-                    // --- Розшифрування (Ваша логіка) ---
+                    // розшифрування блоку
+                    // m = (b * a^(p-1-x)) mod p
                     BigInteger ax_inv = BigInteger.ModPow(a, p - 1 - x, p);
                     BigInteger m = (b * ax_inv) % p;
 
                     byte[] m_bytes = m.ToByteArray(isUnsigned: true);
 
+                    // оскільки останній блок може бути меншим за BLOCK_SIZE,
+                    // враховуємо це при записі розшифрованих даних
                     byte[] decryptedBlock = new byte[BLOCK_SIZE];
                     int bytesToCopy = Math.Min(m_bytes.Length, BLOCK_SIZE);
+                    // зважаючи на обернений порядок байтів у BigInteger.ToByteArray,
+                    // копіюємо з кінця масиву
                     int sourceOffset = Math.Max(0, m_bytes.Length - BLOCK_SIZE);
                     Array.Copy(m_bytes, sourceOffset, decryptedBlock, 0, bytesToCopy);
 
@@ -195,121 +233,6 @@ namespace auth_elgamal.Services
                         totalBytesWritten += bytesToWrite;
                     }
                 }
-            }
-
-            // (Помилка з 'ms' та 'writer' з минулого разу тут відсутня, 
-            // оскільки ми пишемо прямо у FileStream)
-        }
-
-
-        // --- 4. Внутрішній клас ElGamal (ПОВНІСТЮ СКОПІЙОВАНО З ВАШОГО КОДУ) ---
-        private static class ElGamal
-        {
-            private const int MillerRabinIterations = 40;
-
-            public static (BigInteger p, BigInteger q) GenerateSafePrime(int numDigits)
-            {
-                BigInteger p_min = BigInteger.Parse("1" + new string('0', numDigits - 1));
-                BigInteger p_max = BigInteger.Parse("1" + new string('0', numDigits));
-
-                while (true)
-                {
-                    BigInteger q_min = p_min / 2;
-                    BigInteger q_max = p_max / 2;
-                    BigInteger q_candidate = GenerateRandomBigInteger(q_min, q_max);
-                    if (q_candidate.IsEven) q_candidate++;
-
-                    while (q_candidate < q_max)
-                    {
-                        if (IsProbablyPrime(q_candidate, MillerRabinIterations))
-                        {
-                            BigInteger p_candidate = 2 * q_candidate + 1;
-                            if (p_candidate >= p_max) break;
-                            if (IsProbablyPrime(p_candidate, MillerRabinIterations))
-                            {
-                                if (p_candidate >= p_min)
-                                {
-                                    return (p_candidate, q_candidate);
-                                }
-                            }
-                        }
-                        q_candidate += 2;
-                    }
-                }
-            }
-
-            public static BigInteger GenerateG(BigInteger p, BigInteger q)
-            {
-                BigInteger h = 2;
-                while (true)
-                {
-                    BigInteger g = BigInteger.ModPow(h, 2, p);
-                    if (g == 1)
-                    {
-                        h++;
-                        continue;
-                    }
-                    return g;
-                }
-            }
-
-            public static BigInteger GenerateRandomBigInteger(BigInteger min, BigInteger max)
-            {
-                if (min >= max)
-                    throw new ArgumentException("min повинен бути меншим за max");
-
-                BigInteger range = max - min;
-                int byteLen = range.ToByteArray().Length;
-                BigInteger result;
-                using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
-                {
-                    do
-                    {
-                        byte[] bytes = new byte[byteLen];
-                        rng.GetBytes(bytes);
-                        result = new BigInteger(bytes, isUnsigned: true);
-                    }
-                    while (result >= range);
-                }
-                return result + min;
-            }
-
-            public static bool IsProbablyPrime(BigInteger n, int k)
-            {
-                if (n < 2) return false;
-                if (n == 2 || n == 3) return true;
-                if (n.IsEven) return false;
-
-                BigInteger d = n - 1;
-                int s = 0;
-                while (d % 2 == 0)
-                {
-                    d /= 2;
-                    s++;
-                }
-
-                for (int i = 0; i < k; i++)
-                {
-                    BigInteger a = GenerateRandomBigInteger(2, n - 1);
-                    BigInteger x = BigInteger.ModPow(a, d, n);
-                    if (x == 1 || x == n - 1)
-                        continue;
-
-                    bool isComposite = true;
-                    for (int r = 1; r < s; r++)
-                    {
-                        x = BigInteger.ModPow(x, 2, n);
-                        if (x == 1) return false;
-                        if (x == n - 1)
-                        {
-                            isComposite = false;
-                            break;
-                        }
-                    }
-                    if (isComposite)
-                        return false;
-                }
-                return true;
             }
         }
     }

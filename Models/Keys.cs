@@ -1,5 +1,8 @@
 ﻿using System.Numerics;
 
+/// <summary>
+/// Класи для зберігання публічного та приватного ключів ElGamal.
+/// </summary>
 namespace auth_elgamal.Models.Keys
 {
     public class PublicKey
